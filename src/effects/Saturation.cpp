@@ -33,13 +33,13 @@
 using namespace openshot;
 
 /// Blank constructor, useful when using Json to load the effect properties
-Saturation::Saturation() : saturation(1.0) {
+Saturation::Saturation() : saturation(1.0), saturation_R(1.0), saturation_G(1.0), saturation_B(1.0) {
 	// Init effect properties
 	init_effect_details();
 }
 
 // Default constructor
-Saturation::Saturation(Keyframe new_saturation) : saturation(new_saturation)
+Saturation::Saturation(Keyframe new_saturation, Keyframe new_saturation_R, Keyframe new_saturation_G, Keyframe new_saturation_B) : saturation(new_saturation), saturation_R(new_saturation_R), saturation_G(new_saturation_G), saturation_B(new_saturation_B)
 {
 	// Init effect properties
 	init_effect_details();
@@ -71,6 +71,9 @@ std::shared_ptr<Frame> Saturation::GetFrame(std::shared_ptr<Frame> frame, int64_
 
 	// Get keyframe values for this frame
 	float saturation_value = saturation.GetValue(frame_number);
+	float saturation_value_R = saturation_R.GetValue(frame_number);
+	float saturation_value_G = saturation_G.GetValue(frame_number);
+	float saturation_value_B = saturation_B.GetValue(frame_number);
 
 	// Constants used for color saturation formula
 	double pR = .299;
@@ -93,9 +96,9 @@ std::shared_ptr<Frame> Saturation::GetFrame(std::shared_ptr<Frame> frame, int64_
 						 (B * B * pB) );
 
 		// Adjust the saturation
-		R = p + (R - p) * saturation_value;
-		G = p + (G - p) * saturation_value;
-		B = p + (B - p) * saturation_value;
+		R = p + (R - p) * saturation_value * saturation_value_R;
+		G = p + (G - p) * saturation_value * saturation_value_G;
+		B = p + (B - p) * saturation_value * saturation_value_B;
 
 		// Constrain the value from 0 to 255
 		R = constrain(R);
@@ -127,6 +130,9 @@ Json::Value Saturation::JsonValue() {
 	Json::Value root = EffectBase::JsonValue(); // get parent properties
 	root["type"] = info.class_name;
 	root["saturation"] = saturation.JsonValue();
+	root["saturation_R"] = saturation_R.JsonValue();
+	root["saturation_G"] = saturation_G.JsonValue();
+	root["saturation_B"] = saturation_B.JsonValue();
 
 	// return JsonValue
 	return root;
@@ -170,6 +176,12 @@ void Saturation::SetJsonValue(Json::Value root) {
 	// Set data from Json (if key is found)
 	if (!root["saturation"].isNull())
 		saturation.SetJsonValue(root["saturation"]);
+	if (!root["saturation_R"].isNull())
+		saturation_R.SetJsonValue(root["saturation_R"]);
+	if (!root["saturation_G"].isNull())
+		saturation_G.SetJsonValue(root["saturation_G"]);
+	if (!root["saturation_B"].isNull())
+		saturation_B.SetJsonValue(root["saturation_B"]);
 }
 
 // Get all properties for a specific frame
@@ -186,6 +198,9 @@ string Saturation::PropertiesJSON(int64_t requested_frame) {
 
 	// Keyframes
 	root["saturation"] = add_property_json("Saturation", saturation.GetValue(requested_frame), "float", "", &saturation, 0.0, 4.0, false, requested_frame);
+	root["saturation_R"] = add_property_json("Saturation (Red)", saturation_R.GetValue(requested_frame), "float", "", &saturation_R, 0.0, 4.0, false, requested_frame);
+	root["saturation_G"] = add_property_json("Saturation (Green)", saturation_G.GetValue(requested_frame), "float", "", &saturation_G, 0.0, 4.0, false, requested_frame);
+	root["saturation_B"] = add_property_json("Saturation (Blue)", saturation_B.GetValue(requested_frame), "float", "", &saturation_B, 0.0, 4.0, false, requested_frame);
 
 	// Return formatted string
 	return root.toStyledString();
