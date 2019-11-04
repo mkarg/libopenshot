@@ -33,13 +33,13 @@
 using namespace openshot;
 
 /// Blank constructor, useful when using Json to load the effect properties
-Brightness::Brightness() : brightness(0.0), contrast(3.0) {
+Brightness::Brightness() : brightness(0.0), brightness_R(0.0), brightness_G(0.0), brightness_B(0.0), contrast(3.0) {
 	// Init effect properties
 	init_effect_details();
 }
 
 // Default constructor
-Brightness::Brightness(Keyframe new_brightness, Keyframe new_contrast) : brightness(new_brightness), contrast(new_contrast)
+Brightness::Brightness(Keyframe new_brightness, Keyframe new_brightness_R, Keyframe new_brightness_G, Keyframe new_brightness_B, Keyframe new_contrast) : brightness(new_brightness), brightness_R(new_brightness_R), brightness_G(new_brightness_G), brightness_B(new_brightness_B), contrast(new_contrast)
 {
 	// Init effect properties
 	init_effect_details();
@@ -68,6 +68,9 @@ std::shared_ptr<Frame> Brightness::GetFrame(std::shared_ptr<Frame> frame, int64_
 
 	// Get keyframe values for this frame
 	float brightness_value = brightness.GetValue(frame_number);
+	float brightness_value_R = brightness_R.GetValue(frame_number);
+	float brightness_value_G = brightness_G.GetValue(frame_number);
+	float brightness_value_B = brightness_B.GetValue(frame_number);
 	float contrast_value = contrast.GetValue(frame_number);
 
 	// Loop through pixels
@@ -80,16 +83,31 @@ std::shared_ptr<Frame> Brightness::GetFrame(std::shared_ptr<Frame> frame, int64_
 		int B = pixels[byte_index + 2];
 		int A = pixels[byte_index + 3];
 
+		const float RGB = R + G + B;
+
+		if (RGB == 0)
+			continue;
+
+		const float Rpercent = R / RGB;
+		const float Gpercent = G / RGB;
+		const float Bpercent = B / RGB;
+
 		// Adjust the contrast
 		float factor = (259 * (contrast_value + 255)) / (255 * (259 - contrast_value));
 		R = constrain((factor * (R - 128)) + 128);
 		G = constrain((factor * (G - 128)) + 128);
 		B = constrain((factor * (B - 128)) + 128);
 
+		const float brightnessR = Rpercent * brightness_value_R;
+		const float brightnessG = Gpercent * brightness_value_G;
+		const float brightnessB = Bpercent * brightness_value_B;
+
+		const float brightnessSum = brightnessR + brightnessG + brightnessB;
+
 		// Adjust the brightness
-		R += (255 * brightness_value);
-		G += (255 * brightness_value);
-		B += (255 * brightness_value);
+		R += (255 * brightnessSum);
+		G += (255 * brightnessSum);
+		B += (255 * brightnessSum);
 
 		// Constrain the value from 0 to 255
 		R = constrain(R);
@@ -121,6 +139,9 @@ Json::Value Brightness::JsonValue() {
 	Json::Value root = EffectBase::JsonValue(); // get parent properties
 	root["type"] = info.class_name;
 	root["brightness"] = brightness.JsonValue();
+	root["brightness_R"] = brightness_R.JsonValue();
+	root["brightness_G"] = brightness_G.JsonValue();
+	root["brightness_B"] = brightness_B.JsonValue();
 	root["contrast"] = contrast.JsonValue();
 
 	// return JsonValue
@@ -165,6 +186,12 @@ void Brightness::SetJsonValue(Json::Value root) {
 	// Set data from Json (if key is found)
 	if (!root["brightness"].isNull())
 		brightness.SetJsonValue(root["brightness"]);
+	if (!root["brightness_R"].isNull())
+		brightness_R.SetJsonValue(root["brightness_R"]);
+	if (!root["brightness_G"].isNull())
+		brightness_G.SetJsonValue(root["brightness_G"]);
+	if (!root["brightness_B"].isNull())
+		brightness_B.SetJsonValue(root["brightness_B"]);
 	if (!root["contrast"].isNull())
 		contrast.SetJsonValue(root["contrast"]);
 }
@@ -183,6 +210,9 @@ string Brightness::PropertiesJSON(int64_t requested_frame) {
 
 	// Keyframes
 	root["brightness"] = add_property_json("Brightness", brightness.GetValue(requested_frame), "float", "", &brightness, -1.0, 1.0, false, requested_frame);
+	root["brightness_R"] = add_property_json("Brightness (Red)", brightness_R.GetValue(requested_frame), "float", "", &brightness_R, -1.0, 1.0, false, requested_frame);
+	root["brightness_G"] = add_property_json("Brightness (Green)", brightness_G.GetValue(requested_frame), "float", "", &brightness_G, -1.0, 1.0, false, requested_frame);
+	root["brightness_B"] = add_property_json("Brightness (Blue)", brightness_B.GetValue(requested_frame), "float", "", &brightness_B, -1.0, 1.0, false, requested_frame);
 	root["contrast"] = add_property_json("Contrast", contrast.GetValue(requested_frame), "float", "", &contrast, 0.0, 100.0, false, requested_frame);
 
 	// Return formatted string
