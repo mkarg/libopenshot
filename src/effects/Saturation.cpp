@@ -102,9 +102,9 @@ std::shared_ptr<Frame> Saturation::GetFrame(std::shared_ptr<Frame> frame, int64_
 			continue;
 
 		// Calculate purity of R, G and B
-		const float purityR = R / colorSum;
-		const float purityG = G / colorSum;
-		const float purityB = B / colorSum;
+		const float purityR = (float) R / colorSum;
+		const float purityG = (float) G / colorSum;
+		const float purityB = (float) B / colorSum;
 
 		// Calculate separate saturations for R, G and B (respecting adjusted weights)
 		const float saturationR = purityR * saturation_value * saturation_value_R;
