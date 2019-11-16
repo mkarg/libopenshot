@@ -33,7 +33,7 @@
 using namespace openshot;
 
 /// Blank constructor, useful when using Json to load the effect properties
-Brightness::Brightness() : brightness(0.0), brightness_R(0.0), brightness_G(0.0), brightness_B(0.0), contrast(3.0) {
+Brightness::Brightness() : brightness(0.0), brightness_R(0.5), brightness_G(0.5), brightness_B(0.5), contrast(3.0) {
 	// Init effect properties
 	init_effect_details();
 }
@@ -98,9 +98,9 @@ std::shared_ptr<Frame> Brightness::GetFrame(std::shared_ptr<Frame> frame, int64_
 		G = constrain((factor * (G - 128)) + 128);
 		B = constrain((factor * (B - 128)) + 128);
 
-		const float brightnessR = Rpercent * brightness_value_R;
-		const float brightnessG = Gpercent * brightness_value_G;
-		const float brightnessB = Bpercent * brightness_value_B;
+		const float brightnessR = Rpercent * brightness_value_R * brightness_value;
+		const float brightnessG = Gpercent * brightness_value_G * brightness_value;
+		const float brightnessB = Bpercent * brightness_value_B * brightness_value;
 
 		const float brightnessSum = brightnessR + brightnessG + brightnessB;
 
@@ -210,9 +210,9 @@ string Brightness::PropertiesJSON(int64_t requested_frame) {
 
 	// Keyframes
 	root["brightness"] = add_property_json("Brightness", brightness.GetValue(requested_frame), "float", "", &brightness, -1.0, 1.0, false, requested_frame);
-	root["brightness_R"] = add_property_json("Brightness (Red)", brightness_R.GetValue(requested_frame), "float", "", &brightness_R, -1.0, 1.0, false, requested_frame);
-	root["brightness_G"] = add_property_json("Brightness (Green)", brightness_G.GetValue(requested_frame), "float", "", &brightness_G, -1.0, 1.0, false, requested_frame);
-	root["brightness_B"] = add_property_json("Brightness (Blue)", brightness_B.GetValue(requested_frame), "float", "", &brightness_B, -1.0, 1.0, false, requested_frame);
+	root["brightness_R"] = add_property_json("Brightness (Red)", brightness_R.GetValue(requested_frame), "float", "", &brightness_R, 0.0, 1.0, false, requested_frame);
+	root["brightness_G"] = add_property_json("Brightness (Green)", brightness_G.GetValue(requested_frame), "float", "", &brightness_G, 0.0, 1.0, false, requested_frame);
+	root["brightness_B"] = add_property_json("Brightness (Blue)", brightness_B.GetValue(requested_frame), "float", "", &brightness_B, 0.0, 1.0, false, requested_frame);
 	root["contrast"] = add_property_json("Contrast", contrast.GetValue(requested_frame), "float", "", &contrast, 0.0, 100.0, false, requested_frame);
 
 	// Return formatted string
