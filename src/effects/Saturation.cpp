@@ -95,10 +95,29 @@ std::shared_ptr<Frame> Saturation::GetFrame(std::shared_ptr<Frame> frame, int64_
 						 (G * G * pG) +
 						 (B * B * pB) );
 
+		const int colorSum = R + G + B;
+
+		// Fail fast (prevents division by zero): Deep black stays deep black.
+		if (colorSum == 0)
+			continue;
+
+		// Calculate purity of R, G and B
+		const float purityR = R / colorSum;
+		const float purityG = G / colorSum;
+		const float purityB = B / colorSum;
+
+		// Calculate separate saturations for R, G and B (respecting adjusted weights)
+		const float saturationR = purityR * saturation_value * saturation_value_R;
+		const float saturationG = purityG * saturation_value * saturation_value_G;
+		const float saturationB = purityB * saturation_value * saturation_value_B;
+
+		// Calculate overall saturation (sum of separated saturations)
+		const float saturation = saturationR + saturationG + saturationB;
+
 		// Adjust the saturation
-		R = p + (R - p) * saturation_value * saturation_value_R;
-		G = p + (G - p) * saturation_value * saturation_value_G;
-		B = p + (B - p) * saturation_value * saturation_value_B;
+		R = p + (R - p) * saturation;
+		G = p + (G - p) * saturation;
+		B = p + (B - p) * saturation;
 
 		// Constrain the value from 0 to 255
 		R = constrain(R);
