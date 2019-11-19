@@ -90,15 +90,71 @@ std::shared_ptr<Frame> Saturation::GetFrame(std::shared_ptr<Frame> frame, int64_
 		int B = pixels[byte_index + 2];
 		int A = pixels[byte_index + 3];
 
+		/*
+		 * Common saturation adjustment
+		 */
+
 		// Calculate the saturation multiplier
 		double p = sqrt( (R * R * pR) +
 						 (G * G * pG) +
 						 (B * B * pB) );
 
 		// Adjust the saturation
-		R = p + (R - p) * saturation_value * saturation_value_R;
-		G = p + (G - p) * saturation_value * saturation_value_G;
-		B = p + (B - p) * saturation_value * saturation_value_B;
+		R = p + (R - p) * saturation_value;
+		G = p + (G - p) * saturation_value;
+		B = p + (B - p) * saturation_value;
+
+		// Constrain the value from 0 to 255
+		R = constrain(R);
+		G = constrain(G);
+		B = constrain(B);
+
+		/*
+		 * Color-separated saturation adjustment
+		 *
+		 * Splitting each of the three subpixels (R, G and B) into three distincs sub-subpixels (R, G and B in turn)
+		 * which in their optical sum reproduce the original subpixel's color OR produce white light in the brightness
+		 * of the original subpixel (dependening on the color channel's slider value).
+		 */
+
+		// Three subpixels producing either R or white with brightness of R
+		int Rr = R;
+		int Gr = 0;
+		int Br = 0;
+
+		// Three subpixels producing either G or white with brightness of G
+		int Rg = 0;
+		int Gg = G;
+		int Bg = 0;
+
+		// Three subpixels producing either B or white with brightness of B
+		int Rb = 0;
+		int Gb = 0;
+		int Bb = B;
+
+		// Compute the brightness ("saturation multiplier") of the replaced subpixels
+		// Actually mathematical no-ops mostly, verbosity is kept just for clarification
+		const double p_r = sqrt( (Rr * Rr * pR) + (Gr * Gr * pG) + (Br * Br * pB) );
+		const double p_g = sqrt( (Rg * Rg * pR) + (Gg * Gg * pG) + (Bg * Bg * pB) );
+		const double p_b = sqrt( (Rb * Rb * pR) + (Gb * Gb * pG) + (Bb * Bb * pB) );
+
+		// Adjust the saturation
+		Rr = p_r + (Rr - p_r) * saturation_value_R;
+		Gr = p_r + (Gr - p_r) * saturation_value_R;
+		Br = p_r + (Br - p_r) * saturation_value_R;
+
+		Rg = p_g + (Rg - p_g) * saturation_value_G;
+		Gg = p_g + (Gg - p_g) * saturation_value_G;
+		Bg = p_g + (Bg - p_g) * saturation_value_G;
+
+		Rb = p_b + (Rb - p_b) * saturation_value_B;
+		Gb = p_b + (Gb - p_b) * saturation_value_B;
+		Bb = p_b + (Bb - p_b) * saturation_value_B;
+
+		// Recombine brightness of sub-subpixels (Rx, Gx and Bx) into sub-pixels (R, G and B) again
+		R = Rr + Rg + Rb;
+		G = Gr + Gg + Gb;
+		B = Br + Bg + Bb;
 
 		// Constrain the value from 0 to 255
 		R = constrain(R);
