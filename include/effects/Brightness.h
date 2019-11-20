@@ -65,6 +65,9 @@ namespace openshot
 
 	public:
 		Keyframe brightness;	///< Brightness keyframe. A constant value here will prevent animation.
+		Keyframe brightness_R;	///< Brightness keyframe (Red). A constant value here will prevent animation.
+		Keyframe brightness_G;	///< Brightness keyframe (Green). A constant value here will prevent animation.
+		Keyframe brightness_B;	///< Brightness keyframe (Blue) . A constant value here will prevent animation.
 		Keyframe contrast;		///< Contrast keyframe.
 
 		/// Blank constructor, useful when using Json to load the effect properties
@@ -75,7 +78,7 @@ namespace openshot
 		///
 		/// @param new_brightness The curve to adjust the brightness (from -1 to +1, 0 is default/"off")
 		/// @param new_contrast The curve to adjust the contrast (3 is typical, 20 is a lot, 100 is max. 0 is invalid)
-		Brightness(Keyframe new_brightness, Keyframe new_contrast);
+		Brightness(Keyframe new_brightness, Keyframe new_brightness_R, Keyframe new_brightness_G, Keyframe new_brightness_B, Keyframe new_contrast);
 
 		/// @brief This method is required for all derived classes of EffectBase, and returns a
 		/// modified openshot::Frame object
