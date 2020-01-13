@@ -112,3 +112,14 @@ Json::Value ClipBase::add_property_choice_json(std::string name, int value, int 
 	// return JsonValue
 	return new_choice;
 }
+
+Json::Value ClipBase::add_property_string_json(std::string name, std::string value) {
+
+	// Create string
+	Json::Value new_string = Json::Value(Json::objectValue);
+	new_string["name"] = name;
+	new_string["value"] = value;
+
+	// return JsonValue
+	return new_string;
+}

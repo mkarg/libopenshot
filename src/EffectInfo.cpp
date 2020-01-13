@@ -85,6 +85,10 @@ EffectBase* EffectInfo::CreateEffect(std::string effect_type) {
 
 	else if (effect_type == "Wave")
 		return new Wave();
+
+	else if (effect_type == "LUT")
+		return new LUT();
+
 	return NULL;
 }
 
@@ -109,6 +113,7 @@ Json::Value EffectInfo::JsonValue() {
 	root.append(Saturation().JsonInfo());
 	root.append(Shift().JsonInfo());
 	root.append(Wave().JsonInfo());
+	root.append(LUT().JsonInfo());
 
 	// return JsonValue
 	return root;

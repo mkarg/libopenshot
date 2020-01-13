@@ -61,6 +61,9 @@ namespace openshot {
 		/// Generate JSON choice for a property (dropdown properties)
 		Json::Value add_property_choice_json(std::string name, int value, int selected_value);
 
+		/// Generate JSON string for a property (text properties)
+		Json::Value add_property_string_json(std::string name, std::string value);
+
 	public:
 
 		/// Constructor for the base clip

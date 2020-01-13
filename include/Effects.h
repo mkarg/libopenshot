@@ -40,6 +40,7 @@
 #include "effects/Crop.h"
 #include "effects/Deinterlace.h"
 #include "effects/Hue.h"
+#include "effects/LUT.h"
 #include "effects/Mask.h"
 #include "effects/Negate.h"
 #include "effects/Pixelate.h"
