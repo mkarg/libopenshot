@@ -108,11 +108,15 @@ namespace openshot
 
 	class C1DLUT: public ILUT {
 	private:
+		static inline float intervalWidth(const float a, const float b, const int n) {
+			return (b - a) / n;
+		}
+		static inline float compute(const int source, const int n, const float min, const float intervalWidth, const float target[]);
 		static const int N = 1;
 		const float MIN_R = 0, MIN_G = 0, MIN_B = 0;
 		const float MAX_R = 255, MAX_G = 255, MAX_B = 255;
+		const float IVW_R = intervalWidth(MIN_R, MAX_R, N), IVW_G = intervalWidth(MIN_G, MAX_G, N), IVW_B = intervalWidth(MIN_B, MAX_B, N);
 		const float R[N + 1] = { 0, 255 }, G[N + 1] = { 0, 255 }, B[N + 1] = { 0, 255 };
-		static float compute(const int source, const int n, const float min, const float max, const float target[]);
 	public:
 		RGB lookup(const RGB& rgb) const;
 	};

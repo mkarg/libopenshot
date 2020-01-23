@@ -183,23 +183,14 @@ float lerp(const float a, const float b, const float t) {
 }
 
 RGB C1DLUT::lookup(const RGB& rgb) const {
-	return { compute(rgb.R, N, MIN_R, MAX_R, R), compute(rgb.G, N, MIN_G, MAX_G, G), compute(rgb.B, N, MIN_B, MAX_B, B) };
+	return { compute(rgb.R, N, MIN_R, IVW_R, R), compute(rgb.G, N, MIN_G, IVW_G, G), compute(rgb.B, N, MIN_B, IVW_B, B) };
 }
 
-float C1DLUT::compute(const int source, const int n, const float min, const float max, const float target[]) {
-	const float range = max - min;
-	const float intervalWidth = range / n;
+float C1DLUT::compute(const int source, const int n, const float min, const float intervalWidth, const float target[]) {
 	const float i = (source - min) / intervalWidth;
 	const int i0 = floor(i);
 	const int i1 = ceil(i);
-
-if (i0 == i1)
-	return target[i0];
-
-	const float v0 = target[i0];
-	const float v1 = target[i1];
-
-	return lerp(v0, v1, i);
+return i0 == i1 ? target[i0] : lerp(target[i0], target[i1], i);
 }
 
 RGB C3DLUT::lookup(const RGB& rgb) const {
